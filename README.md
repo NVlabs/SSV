@@ -3,12 +3,13 @@
 This repository contains code for our work on Self-Supervised Viewpoint Learning from Image Collections (SSV) accepted at CVPR 2020. 
 SSV provides a framework to learn viewpoint estimation of objects just using images of objects without the need for groundtruth viewpoint annotations.
 
-## Links
-*[PDF](https://research.nvidia.com/sites/default/files/pubs/2020-03_Self-Supervised-Viewpoint-Learning/SSV-CVPR2020.pdf)
-*[Arxiv](http://arxiv.org/abs/2004.01793)
-*[NVIDIA Project Page](https://research.nvidia.com/publication/2020-03_Self-Supervised-Viewpoint-Learning)  
-
 ![ssv](utils/ssv_small.gif)
+
+## Links
+* [PDF](https://research.nvidia.com/sites/default/files/pubs/2020-03_Self-Supervised-Viewpoint-Learning/SSV-CVPR2020.pdf) 
+* [Arxiv](http://arxiv.org/abs/2004.01793) 
+* [NVIDIA Project Page](https://research.nvidia.com/publication/2020-03_Self-Supervised-Viewpoint-Learning)  
+
 
 ## Prerequisites
 We used Pytorch 1.0 with CUDA 10 and CuDNN 7.4.1 in Ubuntu 16.04.
