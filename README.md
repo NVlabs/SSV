@@ -5,9 +5,7 @@ SSV provides a framework to learn viewpoint estimation of objects just using ima
 
 ## Links
 *[PDF](https://research.nvidia.com/sites/default/files/pubs/2020-03_Self-Supervised-Viewpoint-Learning/SSV-CVPR2020.pdf)
-
 *[Arxiv](http://arxiv.org/abs/2004.01793)
-
 *[NVIDIA Project Page](https://research.nvidia.com/publication/2020-03_Self-Supervised-Viewpoint-Learning)  
 
 ![ssv](utils/ssv_small.gif)
@@ -45,7 +43,7 @@ To train SSV from scratch, run the following:
 
 ## Citation
 
-Please cite our below paper if you find this code useful for your research.
+Please cite our paper if you find this code useful for your research.
 
 ```
 @inproceedings{mustikovelaCVPR20,
