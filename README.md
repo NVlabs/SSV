@@ -29,7 +29,7 @@ Create an lmdb of the preprocessed 300W-LP data by running:
 
 
 ### BIWI Head Pose
-BIWI headpose estimation dataset can by downloaded by writing to the authors of 'Fanelli, G. and Dantone, M. and Gall, J. and Fossati, A. and van Gool, L., Random Forests for Real Time 3D Face Analysis, Fanelli et al, International Journal of Computer Vision, 2013. To preprocess it run:  
+BIWI headpose estimation dataset can by downloaded by writing to the authors of 'Fanelli, G. and Dantone, M. and Gall, J. and Fossati, A. and van Gool, L., Random Forests for Real Time 3D Face Analysis, International Journal of Computer Vision, 2013. To preprocess it run:  
 `python preprocess_data.py --src-dir <path_to_biwi_dataset> --dst-dir <path_to_processed_biwi> --datset BIWI`
 
 
