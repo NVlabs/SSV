@@ -14,7 +14,7 @@ SSV provides a framework to learn viewpoint estimation of objects just using ima
 
 ## Prerequisites
 We used Pytorch 1.0 with CUDA 10 and CuDNN 7.4.1 in Ubuntu 16.04.
-All the dependencies are provided in requirements.txt
+All the dependencies are provided in requirements.txt.
 A similar environment can be created using:  
 `conda create --name ssv --file requirements.txt`
 
