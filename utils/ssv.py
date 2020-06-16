@@ -7,6 +7,10 @@
 import numpy as np
 import random
 from PIL import Image
+import cv2
+import math
+from math import sin,cos
+
 
 import torch
 from torch import nn, optim
@@ -271,7 +275,27 @@ def generate_samples(generator, azs, els, cts, args, itr, tag, z_sampling='unifo
     imageio.mimsave(os.path.join(args.exp_root, args.exp_name, 'gen_samples', str(itr), tag, 'gen_gif.gif'), gif_images)        
 
 
-def draw_axis(img, yaw, pitch, roll, tdx=None, tdy=None, size = 100):
+def drawPose(img, r, t, cam, dist):
+    modelAxes = np.array([
+        np.array([0., -20., -40.]).reshape(1,3),
+        np.array([50., -20., 0.]).reshape(1,3),
+        np.array([0., -70., 0.]).reshape(1,3),
+        np.array([0., -20., -50.]).reshape(1,3)
+    ])
+
+    projAxes, jac = cv2.projectPoints(modelAxes, r, t, cam, dist)
+
+    cv2.line(img, (int(projAxes[0,0,0]), int(projAxes[0,0,1])), \
+             (int(projAxes[1,0,0]), int(projAxes[1,0,1])), (0,255,255), 2)
+    cv2.line(img, (int(projAxes[0,0,0]), int(projAxes[0,0,1])), \
+             (int(projAxes[2,0,0]), int(projAxes[2,0,1])), (255,0,255), 2)
+    cv2.line(img, (int(projAxes[0,0,0]), int(projAxes[0,0,1])), \
+             (int(projAxes[3,0,0]), int(projAxes[3,0,1])), (255,255,0), 2)
+             
+    return img, projAxes
+
+
+def draw_axis(img, yaw, pitch, roll, tdx=None, tdy=None, size = 40):
 
     pitch = pitch * np.pi / 180
     yaw = -(yaw * np.pi / 180)
@@ -299,7 +323,7 @@ def draw_axis(img, yaw, pitch, roll, tdx=None, tdy=None, size = 100):
     y3 = size * (-cos(yaw) * sin(pitch)) + tdy
 
     # return img
-    return tdx, tdy, np.array([x1, x2, x3]), np.array([y1, y2, y3]), img      
+    return tdx, tdy, np.array([x1, x2, x3]), np.array([y1, y2, y3]), img     
 
 
 class Saver():
@@ -314,7 +338,7 @@ class Saver():
 
 	def save_model(self, modelname, epoch):
 		torch.save(self.model_list[modelname].state_dict(), 
-					os.path.(self.modeldir,'%s_%08i_%s_checkpoint.pt'%(modelname, epoch, self.opt.model_name)) ) 
+					os.path.join(self.modeldir,'%s_%08i_%s_checkpoint.pt'%(modelname, epoch, self.opt.model_name)) ) 
 	
 	def save_all_models(self,epoch):
 		for modelname in self.model_list.keys():

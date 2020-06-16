@@ -18,7 +18,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, utils
 import torchvision
 
-from ssv import VPAwareSynthesizer, VPNet
+from ssv import  VPNet,  VPAwareSynthesizer_ssv
 from utils.dataset import lmdbDataset, lmdbDataset_withGT
 from utils.ssv import get_az_el_ct_rots, gen_az_rots, gen_el_rots, gen_ct_rots, generate_samples
 from utils.ssv import AlexNetConv4, accumulate, sample_data, requires_grad
@@ -268,10 +268,9 @@ if __name__ == '__main__':
     parser.add_argument('--save_interval', default=5000, type=int, help='interval to save models')        
     parser.add_argument('--sample_interval', default=5000, type=int, help='interval to generate samples')            
     
-    parser.add_argument('--gpus', type=str, default=0, help='GPU numbers used for training')
+    parser.add_argument('--gpus', type=str, default='0', help='GPU numbers used for training')
     parser.add_argument('--num_workers', type=int, default=16, help='num workers for data loader')
     
-    parser.add_argument('--phase', type=int, default=600_000, help='number of samples used for each training phases')
     parser.add_argument('--lr', default=0.001, type=float, help='learning rate')
     parser.add_argument('--sched', action='store_true', help='use lr scheduling')
     parser.add_argument('--batch_size', default=32, type=int, help='batch size')    
@@ -292,7 +291,7 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------------------------------------------------------------#
 
     if args.gpus is not None:
-        os.environ['CUDA_VISIBLE_DEVICES']=args.gpus
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
     
     code_size = args.code_size
 
@@ -318,6 +317,7 @@ if __name__ == '__main__':
 
     saver = Saver(args)
     saver.add_model('generator',generator)
+    saver.add_model('g_running',g_running)
     saver.add_model('discriminator',discriminator)
 
     transform = transforms.Compose([transforms.ToTensor(),

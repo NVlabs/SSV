@@ -18,29 +18,12 @@ import math
 import argparse
 import pandas as pd
 import pickle
-from tqdm import tqdm
+from tqdm import tqdm 
 sys.path.append('./mtcnn-pytorch')
 from src import detect_faces
 sys.path.append('../extern')
 from transformImage import transformImage
 
-parser = argparse.ArgumentParser(description='Pre-process data')
-
-parser.add_argument('--weights-dir', type=str, default='mtcnn-pytorch/src/weights',
-                    help='directory in which the pretrained face detector weights are saved')
-parser.add_argument('--dataset', type=str, default='BIWI',
-                    help='dataset, default: BIWI, options: BIWI/300W_LP')
-parser.add_argument('--src-dir', type=str, default='../data',
-                    help='path to raw images')
-parser.add_argument('--dst-dir', type=str, default='./cropped1024x1024',
-                    help='destination directory')
-parser.add_argument('--start', default=0, type=int, help='starting index')
-parser.add_argument('--end', default=0, type=int, help='ending index')
-
-args = parser.parse_args()
-                    
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
 
 def readCalibrationFile(calibration_file):
     """
@@ -104,13 +87,74 @@ def readPoseFile(pose_file):
     
     return pose
 
+def detect_face(cv_orig_im, mask):
+    final_landmarks = []
+    x,y,w,h = cv2.boundingRect(cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY))
+    top = int(max(math.ceil(y-h*0.1), 0))
+    bottom = int(max(math.floor(y+h*0.1), cv_orig_im.shape[0]))
+    left = int(min(math.ceil(x-w*0.1), 0))
+    right = int(max(math.floor(x+w*0.1), cv_orig_im.shape[1]))
+    pil_im = Image.fromarray(cv2.cvtColor(cv_orig_im[top:bottom,left:right,:], cv2.COLOR_BGR2RGB))
+        
+    bboxes, landmarks = detect_faces(pil_im, in_weights_dir = 'data_preprocessing/mtcnn-pytorch/src/weights')
+
+    if len(bboxes)>1:
+        max_prob = 0
+        max_idx = 0
+        for j in range(len(bboxes)):
+            if bboxes[j,4] > max_prob:
+                max_prob = bboxes[j,4]
+                max_idx = j
+        final_bbox = bboxes[max_idx,:]
+        if max_prob>0.91:
+            final_landmarks = landmarks[max_idx,:]
+    else:
+        if bboxes[0,4]>0.91:
+            final_bbox = bboxes
+            final_landmarks = landmarks
+
+    if final_landmarks==[]:
+        return final_landmarks
+        
+    final_bbox = np.squeeze(final_bbox)
+    final_bbox[0] += left
+    final_bbox[2] += left
+    final_bbox[1] += top
+    final_bbox[3] += top
+    
+    landmarks = np.array(final_landmarks).reshape(2,5).transpose() 
+    landmarks[:,0] += left
+    landmarks[:,1] += top   
+
+    return landmarks     
+
+
+parser = argparse.ArgumentParser(description='Pre-process data')
+
+parser.add_argument('--weights-dir', type=str, default='mtcnn-pytorch/src/weights',
+                    help='directory in which the pretrained face detector weights are saved')
+parser.add_argument('--dataset', type=str, default='BIWI',
+                    help='dataset, default: BIWI, options: BIWI/300W_LP')
+parser.add_argument('--src-dir', type=str, default='../data',
+                    help='path to raw images')
+parser.add_argument('--dst-dir', type=str, default='./cropped1024x1024',
+                    help='destination directory')
+parser.add_argument('--start', default=0, type=int, help='starting index')
+parser.add_argument('--end', default=0, type=int, help='ending index')
+
+args = parser.parse_args()
+                    
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
+
+
 
 if __name__ == "__main__":
     
     if args.dataset == '300WLP':
 
         images = open(args.src_dir + '/images.txt').readlines()
-        for image in images[args.start:10]:
+        for image in tqdm(images[args.start:args.end]):
             cv_orig_im = cv2.imread(os.path.join(args.src_dir, image[:-1]))
             pil_im = Image.fromarray(cv2.cvtColor(cv_orig_im, cv2.COLOR_BGR2RGB))
             bboxes, landmarks = detect_faces(pil_im, min_face_size = 30, in_weights_dir = args.weights_dir)   
@@ -158,7 +202,7 @@ if __name__ == "__main__":
             images = glob2.glob(session_dir + '/*.png')
             calibration = readCalibrationFile(os.path.join(session_dir,'rgb.cal'))
         
-            for image in tqdm(images):
+            for image in tqdm(images[args.start:args.end]):
                 cv_orig_im = cv2.imread(image)
      
                 mask = cv2.imread(os.path.join(args.src_dir, 'head_pose_masks/', '%02d' % (i+1), image[-19:-8] + '_depth_mask.png'))

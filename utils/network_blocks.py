@@ -147,7 +147,7 @@ class projection_unit(nn.Module):
         super().__init__()
 
         self.conv = EqualConv2d(in_channel, out_channel, kernel_size, padding=0)
-        self.lrelu = nn.PReLU(1024)         
+        self.lrelu = nn.PReLU(512)         
 
     def forward(self, input):
         batch = input.shape[0]

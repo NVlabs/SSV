@@ -19,7 +19,7 @@ import numpy as np
 from tqdm import tqdm
 
 from ssv import VPNet
-from utils.dataset import lmdbDataset_withGT
+from utils.dataset import ImageFolderWithPaths
 
 import code
 
@@ -34,7 +34,6 @@ args = parser.parse_args()
 
 test_data_root = args.data_dir
 code_size = 64
-
 vpnet = nn.DataParallel(VPNet((code_size*2), instance_norm=True)).cuda()
 vpnet.load_state_dict(torch.load(args.model_path))
 vpnet.eval()
@@ -46,7 +45,7 @@ transform = transforms.Compose(
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ]) 
 
-dataset = lmdbDataset_withGT(test_data_root, transform=transform)
+dataset = ImageFolderWithPaths(test_data_root, transform=transform)
 test_data_loader = DataLoader(dataset, shuffle=False, batch_size=1, num_workers=1)
 
 pred_a = []; pred_e = []; pred_t = []

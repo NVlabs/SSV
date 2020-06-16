@@ -109,6 +109,91 @@ class VPAwareSynthesizer(nn.Module):
         return self.generator(styles, rots, batch_size=input[0].shape[0])
 
 
+# Generator module for VP aware synthesizer
+class VPASGenerator_ssv(nn.Module):
+    def __init__(self, code_dim):
+        super().__init__()
+
+        self.progression1 = nn.ModuleList(
+            [
+                StyledConvBlock3(512, 512, 3, 1, style_dim=code_dim, initial=True),
+                StyledConvBlock3(512, 256, 3, 1, style_dim=code_dim,),
+                StyledConvBlock3(256, 128, 3, 1, style_dim=code_dim,),
+            ]
+        )
+
+        self.progression2 = nn.ModuleList(
+            [
+                StyledConvBlock3_noAdaIN(128, 64, 3, 1),
+                StyledConvBlock3_noAdaIN(64, 64, 3, 1),
+            ]
+        )
+
+        self.projection_unit = projection_unit(64*16, 512)
+
+        self.scb1 = StyledConvBlock2(512, 256, 3, 1, style_dim=code_dim)
+        self.scb2 = StyledConvBlock2(256, 64, 3, 1, style_dim=code_dim)
+        self.scb3 = StyledConvBlock2(64, 32, 3, 1, style_dim=code_dim)
+
+        self.to_rgb = EqualConv2d(32, 3, 1) 
+
+    def forward(self, style, rots, batch_size):
+
+        for i,conv in enumerate(self.progression1):
+            if i==0:
+                out = conv(batch_size, style[0])
+            else:
+                upsample = F.interpolate(out, scale_factor=2, mode='trilinear', align_corners=False)
+                out = conv(upsample, style[0])
+ 
+        flow = F.affine_grid(rots, torch.Size([batch_size, 256, 16, 16, 16]))  
+        out = F.grid_sample(out, flow, mode='nearest') 
+
+        for i,conv in enumerate(self.progression2):
+            out = conv(out)
+
+        out = self.projection_unit(out)
+
+        out = F.interpolate(out, scale_factor=2, mode='bilinear', align_corners=False)
+        out = self.scb1(out,style[1]) 
+        out = F.interpolate(out, scale_factor=2, mode='bilinear', align_corners=False)
+        out = self.scb2(out,style[1]) 
+        out = F.interpolate(out, scale_factor=2, mode='bilinear', align_corners=False)
+        out = self.scb3(out,style[1]) 
+        out = self.to_rgb(out)
+
+        return out
+
+# Viewpoint aware synthesizer
+class VPAwareSynthesizer_ssv(nn.Module):
+    def __init__(self, code_dim=128, n_mlp=8):
+        super().__init__()
+
+        # Generator network
+        self.generator = VPASGenerator_ssv(code_dim)
+
+        # Style network
+        layers = [PixelNorm()]
+        for i in range(n_mlp):
+            layers.append(EqualLinear(code_dim, code_dim))
+            layers.append(nn.LeakyReLU(0.2))
+
+        self.style = nn.Sequential(*layers)
+
+    def forward(self, input, rots=None):
+
+        styles = []
+        if type(input) not in (list, tuple):
+            input = [input]
+
+        for i in input:
+            styles.append(self.style(i))
+
+        return self.generator(styles, rots, batch_size=input[0].shape[0])
+
+
+
+
 # Viewpoint network
 class VPNet(nn.Module):
 

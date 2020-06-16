@@ -30,18 +30,30 @@ Create an lmdb of the preprocessed 300W-LP data by running:
 
 
 ### BIWI Head Pose
-BIWI headpose estimation dataset can by downloaded by writing to the authors of 'Fanelli, G. and Dantone, M. and Gall, J. and Fossati, A. and van Gool, L., Random Forests for Real Time 3D Face Analysis, International Journal of Computer Vision, 2013.' To preprocess it run:  
-`python preprocess_data.py --src-dir <path_to_biwi_dataset> --dst-dir <path_to_processed_biwi> --datset BIWI`
+BIWI headpose estimation dataset can by downloaded by writing to the authors of 'Fanelli, G. and Dantone, M. and Gall, J. and Fossati, A. and van Gool, L., Random Forests for Real Time 3D Face Analysis, International Journal of Computer Vision, 2013.'   
+To preprocess it run:  
+`python preprocess_data.py --src-dir <path_to_biwi_dataset> --dst-dir <path_to_processed_biwi> --dataset BIWI`
 
 
 ## Test
-To test SSV download the pretrained models from [here](link.to.models).
+To obtain the pretrained model please send an email [here](siva.mustikovela@iwr.uni-heidelberg.de).  
 Run the following:   
 `python test_vpnet.py --data_dir <path_to_processed_biwi> --model_path <path_to_pretrained_model> `
 
+## Demo
+Run the following for visualization of head pose predictions on some samples of BIWI dataset.   
+`python ssv_demo.py`  
+The plots are saved in 'demo_images/plots'.
+
+## Synthesized samples
+The following command produces some sample synthesized images. These are saved in ''synth_images'.  
+`python test_synthesis.py`  
+The gif looks similar to the one shown below.   
+![synthesis examples](synth_images/gen_gif.gif)
+
 ## Training
 To train SSV from scratch, run the following:  
-`python3 train.py --exp_name SSV --data_path <path_to_300wlp_lmdb> --num_workers 4 --exp_root  <path_to_experiments_dir>  --save_interval 5000 --sample_interval 500 --batch_size 2 --lr 0.0005 --code_size 64 --z_recn_weight 1.0 --vp_recn_weight 1.0 --img_recn_weight 0.6 --flip_cons_weight 0.6 --flipc_recn_weight_G 0.5 --az_range 1.4 --el_range 1.2 --ct_range 0.75`
+`python3 train.py --exp_name SSV --data_path <path_to_300wlp_lmdb> --num_workers 4 --exp_root  <path_to_experiments_dir>  --save_interval 5000 --sample_interval 500 --batch_size 2 --lr 0.0005 --code_size 64 --z_recn_weight 0.8 --vp_recn_weight 0.8 --img_recn_weight 0.4 --flip_cons_weight 0.4 --flipc_recn_weight_G 0.5 --az_range 1.4 --el_range 1.2 --ct_range 0.75`
 
 ## Citation
 
