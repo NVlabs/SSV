@@ -36,7 +36,7 @@ To preprocess it run:
 
 
 ## Test
-To obtain the pretrained model please send an email [here](siva.mustikovela@iwr.uni-heidelberg.de).  
+To obtain the pretrained model please send an email [mailto](siva.mustikovela@iwr.uni-heidelberg.de).
 Run the following:   
 `python test_vpnet.py --data_dir <path_to_processed_biwi> --model_path <path_to_pretrained_model> `
 
